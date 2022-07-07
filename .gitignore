@@ -1,0 +1,6 @@
+#File ausiliari prodotti dal compilatore LaTeX
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.gz

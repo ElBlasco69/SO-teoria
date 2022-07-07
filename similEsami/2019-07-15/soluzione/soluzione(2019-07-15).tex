@@ -1,0 +1,342 @@
+\documentclass{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{caption}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
+\title{Esame 2019/07/15}
+\author{Blascovich Alessio}
+\date{}
+
+\begin{document}
+    \maketitle
+    \section*{Domanda 1}
+    \textbf{MAX PUNTI:} 4\\
+    \textbf{Domanda:}
+
+
+    Spiegare in dettaglio che cos'è il trashing, perche' si verifica e le possibili misure per mitigarlo/eliminarlo.\\
+    \textbf{Soluzione:}
+
+
+    Il fenomeno del trashing si verifica quando il numero dei page fault aumenta a causa del numero limitato di frame che un processo alloca.\\
+    Questo porta ad un circolo vizioso che si manifesta in perdita di prestazioni con conseguente:
+    \begin{enumerate}
+        \item Diminuzione dell'uso della CPU perchè molti processi sono in attesa di gestire page fault.
+        \item Vedendo la CPU poco usata l' O.S. carica ulteriori processi aumentando la multiprogrammazione.
+        \item I nuovi processi rubano frame ai vecchi processi, per cui aumentano i page fault.
+        \item Ritorno al punto 1
+    \end{enumerate}
+    Ad un certo punto il throughput ha un tracollo, per cui bisogna stimare con una certa precisione l'effettivo numero di frame che servono ad un processo.\\
+    Una soluzione accettabile è determinare un numero di page fault "ideale", quindi se ho troppi page fault aumento il numero di frame associati ad quel processo, mentre se ne ho troppo pochi vuol dire che può rilasciare dei frame.
+    \section*{Domanda 2}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
+
+
+    Data la situazione descritta successivamente, con 4 tipi di risorse e 5 processi in competizione per le risorse.\\
+    Si supponga che il processo $P_1$ effettui la richiesta Req=(0,4,2,0).\\
+    Usando l'algoritmo del banchiere indicare se la richiesta porta ad uno stato safe, in caso affermativo elencare una sequenza.\\
+    \begin{minipage}[c]{0.3\textwidth}
+        \captionof*{table}{\emph{Allocation}}
+        \centering
+        \begin{tabular}{c|cccc}
+            $P_0$ & 0 & 0 & 1 & 2\\
+            \hline
+            $P_1$ & 1 & 0 & 0 & 0\\
+            \hline
+            $P_2$ & 1 & 3 & 5 & 4\\
+            \hline
+            $P_3$ & 0 & 6 & 3 & 2\\
+            \hline
+            $P_4$ & 0 & 0 & 1 & 4\\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[c]{0.3\textwidth}
+        \captionof*{table}{\emph{Max}}
+        \centering
+        \begin{tabular}{cccc}
+            0 & 0 & 1 & 2\\
+            \hline
+            1 & 6 & 5 & 0\\
+            \hline
+            2 & 3 & 5 & 6\\
+            \hline
+            0 & 6 & 4 & 2\\
+            \hline
+            0 & 6 & 5 & 6\\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[c]{0.3\textwidth}
+        \captionof*{table}{\emph{Availaible}}
+        \centering
+        \begin{tabular}{cccc}
+            1 & 5 & 2 & 0
+        \end{tabular}
+    \end{minipage}\\
+    \textbf{Soluzione:}
+
+
+    Calcolo la prima tabella che mi serve definita come \emph{Need}[i]=\emph{Max}[i]-\emph{Allocation}[i].\\
+    \begin{minipage}[c]{0.3\textwidth}
+        \captionof*{table}{\emph{Need}}
+        \centering
+        \begin{tabular}{c|cccc}
+            $P_0$ & 0 & 0 & 0 & 0\\
+            \hline
+            $P_1$ & 0 & 6 & 5 & 0\\
+            \hline
+            $P_2$ & 1 & 0 & 0 & 2\\
+            \hline
+            $P_3$ & 0 & 0 & 1 & 0\\
+            \hline
+            $P_4$ & 0 & 6 & 4 & 2\\
+        \end{tabular}
+    \end{minipage}\\
+    Adesso verifico che (con i si intende l'indfice del prcesso che fa la richiesta) Req[]$>$\emph{Need}[i][] e che Req[]$>$\emph{Availaible}[], il test è passato, quindi posso verificare se è safe o meno la richiesta del processo, simulandola con l'ausilio di 3 nuove tabelle:
+    \begin{enumerate}
+        \item \emph{Ava}[]=\emph{Available}[]-Req[]
+        \item \emph{Alloc}[i][]=\emph{Allocation}[i][]+Req[]
+        \item \emph{Needed}[i][]=\emph{Need}[i][]-Req[]
+    \end{enumerate}
+    \begin{minipage}[c]{0.3\textwidth}
+        \captionof*{table}{\emph{Ava}}
+        \centering
+        \begin{tabular}{cccc}
+            1 & 1 & 0 & 0\\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[c]{0.3\textwidth}
+        \captionof*{table}{\emph{Alloc}}
+        \centering
+        \begin{tabular}{c|cccc}
+            $P_0$ & 0 & 0 & 1 & 2\\
+            \hline
+            $P_1$ & 1 & 4 & 2 & 0\\
+            \hline
+            $P_2$ & 1 & 3 & 5 & 4\\
+            \hline
+            $P_3$ & 0 & 6 & 3 & 2\\
+            \hline
+            $P_4$ & 0 & 0 & 1 & 4\\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[c]{0.3\textwidth}
+        \captionof*{table}{\emph{Needed}}
+        \centering
+        \begin{tabular}{c|cccc}
+            $P_0$ & 0 & 0 & 0 & 0\\
+            \hline
+            $P_1$ & 0 & 2 & 3 & 0\\
+            \hline
+            $P_2$ & 1 & 0 & 0 & 2\\
+            \hline
+            $P_3$ & 0 & 0 & 1 & 0\\
+            \hline
+            $P_4$ & 0 & 6 & 4 & 2\\
+        \end{tabular}
+    \end{minipage}\\
+    Ora verifico di essere in uno stato safe con i seguenti passagi.\\
+    Inanzitutto creo \emph{work}[]=\emph{Ava}[] e \emph{Finish}[]=\{False,\dots,False\}.
+    \begin{enumerate}
+        \item Trovo un indice i tale che:
+            \begin{itemize}
+                \item \emph{Finish}[i]==False
+                \item \emph{Needed}[i][] $\le$ \emph{Work}[]
+            \end{itemize}
+            Se non esiste una tale i andare al punto 3.
+        \item \emph{Work}[]=\emph{Work}[]+\emph{Alloc}[i][]\\
+            \emph{Finish}[i][]=True\\
+            Torna al punto 1.
+        \item Se \emph{Finish}[i]==True $\forall$ i, allora il sistema è in stato safe.
+    \end{enumerate}
+    Ora lancio l'algoritmo con \emph{Work}=(1,1,0,0):
+    \begin{enumerate}
+        \item Iterazione:
+            \begin{itemize}
+                \item i=0 \emph{Finsh}[0]=False and (0,0,0,0) $\le$ (1,1,0,0) $\Rightarrow$ \emph{Finsh}[0]=True e \emph{Work}[]=\emph{Work}[]+\emph{Alloc}[0][]=(1,1,1,2)
+            \end{itemize}
+        \item Iterazione:
+            \begin{itemize}
+                \item i=0 \emph{Finish}[0]==True $\Rightarrow$ ++i
+                \item i=1 \emph{Finish}[1]==False ma (0,2,3,0) $>$ (1,1,1,2) $\Rightarrow$ ++i
+                \item i=2 \emph{Finish}[2]==False and (1,0,0,2) $\le$ (1,1,1,2) $\Rightarrow$ \emph{Finsh}[2]=True e \emph{Work}[]=\emph{Work}[]+\emph{Alloc}[2][]=(2,4,6,6)
+            \end{itemize}
+        \item Iterazione:
+            \begin{itemize}
+                \item i=0 \emph{Finish}[0]==True $\Rightarrow$ ++i
+                \item i=1 \emph{Finish}[0]==False and (0,2,3,0) $\le$ (2,4,6,6) $\Rightarrow$ \emph{Finsh}[1]=True e \emph{Work}[]=\emph{Work}[]+\emph{Alloc}[1][]=(3,8,8,6)
+            \end{itemize}
+        \item Iterazione:
+            \begin{itemize}
+                \item i=0,\dots,2 \emph{Finish}[i]==True $\Rightarrow$ ++i
+                \item i=3 \emph{Finish}[3]==False and (0,0,1,0) $\le$ (3,8,8,6) $\Rightarrow$ \emph{Finsh}[3]=True e \emph{Work}[]=\emph{Work}[]+\emph{Alloc}[3][]=(3,14,11,8)
+            \end{itemize}
+        \item Iterazione:
+            \begin{itemize}
+                \item i=0,\dots,3 \emph{Finish}[i]==True $\Rightarrow$ ++i
+                \item i=4 \emph{Finish}[4]==False and (0,6,4,2) $\le$ (3,14,11,8) $\Rightarrow$ \emph{Finsh}[4]=True e \emph{Work}[]=\emph{Work}[]+\emph{Alloc}[4][]=(3,14,12,12)
+            \end{itemize}
+        \item Iterazione:
+            \begin{itemize}
+                \item $\forall$ i \emph{Finish}[i]==True $\Rightarrow$ ++i
+            \end{itemize}
+    \end{enumerate}
+    Esco dalla funzione e restituisco False, quindi nonn è presente uno stato unsafe.
+    \section*{Domanda 3}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
+
+
+    Data una memoria divisa in 5 partizioni da 100K, 500K, 200k, 300k e 600k (nell'ordine) ed i processi $P_i$ di dimensioni 212K, 417K, 112K e 426K.\\
+    Applico le politiche del First-fit, Best-fit e Worst-fit, quale performa meglio?\\
+    \textbf{Soluzione:}
+
+
+    Devo disegnare delle tabelle in cui le applico tutte.
+    \begin{itemize}
+        \item \emph{First-fit}:
+            \begin{minipage}[c]{0.3\textwidth}
+                \begin{tabular}{|c|c|}
+                    \hline
+                    100k & \\
+                    \hline
+                    500K & $P_0$\\
+                    \hline
+                    200k & $P_2$\\
+                    \hline
+                    300k & \\
+                    \hline
+                    600k & $P_1$\\
+                    \hline
+                \end{tabular}
+            \end{minipage}\\
+            Con questo metodo metto il processo nel primo slot abbstanza grande da poterlo contenere.\\
+            Così facendo però, il $P_3$ non viene caricato in memoria ed ho ancora 400k disponibili(+ quella interna ad ogni partizione che non viene usata).
+        \item \emph{Best-fit}
+            \begin{minipage}[c]{0.3\textwidth}
+                \begin{tabular}{|c|c|}
+                    \hline
+                    100k & \\
+                    \hline
+                    500K & $P_1$\\
+                    \hline
+                    200k & $P_2$\\
+                    \hline
+                    300k & $P_0$\\
+                    \hline
+                    600k & $P_3$\\
+                    \hline
+                \end{tabular}
+            \end{minipage}\\
+            Con questo metodo inserisco il processo nel buco più piccoloc he lo può contenere, devo però scannerizzare ogni volta la coda che contiene le partizioni di memoria.\\
+            Seppur più pesante questo metodo mi permette di allocare tutti i processi lasciando liberi solo 100k di memoria(+ quella interna ad ogni partizione che non viene usata).
+        \item \emph{Worst-fit}
+            \begin{minipage}[c]{0.3\textwidth}
+                \begin{tabular}{|c|c|}
+                    \hline
+                    100k & \\
+                    \hline
+                    500K & $P_1$\\
+                    \hline
+                    200k & \\
+                    \hline
+                    300k & $P_2$\\
+                    \hline
+                    600k & $P_0$\\
+                    \hline
+                \end{tabular}
+            \end{minipage}\\
+            Questo metodo come il \emph{Best-fit} necessita di scannerizzare ogni volta la lista delle partizioni, perchè alloca un processo nello slot più grande che è disponibile in quel momento.\\
+            Così facendo si hanno 300k di memoria del tutto liberi(+ quelli interni ad ogni partizione che non vengono usati).
+    \end{itemize}
+    Ne risulta che che seppur più pesante del \emph{First-fit} il \emph{Best-fit} è quello che permette di allocare più processi con un minore spreco di memoria.
+    \section*{Domanda 4}
+    \textbf{MAX PUNTI:} 4\\
+    \textbf{Domanda:}
+
+
+    Si consideri un calcolatore con memoria virtuale in cui i frame sono di 2K, per descrivere l'indirizzo di un frame servono 32 bit.\\
+    Quanti KB di memoria virtuale posso rappresentare se uso una paginazione a 2 livello?.\\
+    \textbf{Soluzione:}
+
+
+    So che per una pagina ho 2KB=2048B=$2^{11}$B $\Rightarrow$ 11 bit di offset, ora devo sotrarre dal totale dio bit(32) il numero di bit necessari per l'offset, ottengo 32-11=21 che sono i bit che rappresentano un frame.\\
+    So che ogni frame è grande 2KB e con 11 bit posso rappresentare $2^{11}$=2097152 indirizzi, quindi posso indirizzare un totale di 2KB*$2^{11}$=4194304KB=4GB.
+    \section*{Domanda 5}
+    \textbf{MAX PUNTI:} 5\\
+    \textbf{Domanda:}
+
+
+    Descrivere nel dettaglio come avviene la comunicazione tra 2 processi in UNIX tramite memoria condivisa.\\
+    \textbf{Soluzione:}
+
+
+    Nel mondo UNIX si posso usare delle funzioni di C a basso livello per craere aree di memoria condivisa.\\
+    Prima si crea l'area di memoria identificata da un id, sucessivamente tutti i processi che si vogliono attaccare devo creare un puntatore a quell'area tramite l'id.\\
+    Per scrivere/leggere sul segmento in comune di usare la funzione di stampa/lettura indicando come stream il puntatore prima otenuto.\\
+    Una volta terminato il processo può rimuovere dal suo spazio di indirizzi il puntatoreall'area condivisa, al termine di tutto il programma si dovrà eseguire una funzione che libera del tutto l'area di memoria che prima era condivisa tra i processi.
+    \section*{Domanda 6}
+    \textbf{MAX PUNTI:} 7\\
+    \textbf{Domanda:}
+    
+    
+    Scrivere in pseudocidice un algoritmo basato sui semafori che permetta di:
+    \begin{enumerate}
+        \item Far arrivare il processo P alla risorsa A e fargliela usare.
+        \item Far arrivare i processi $P_1$ e $P_2$ alla risorsa A, non importa l'ordine di utilizzo della risorsa A.
+        \item Liberare la risorsa e ritornare al punto 1.
+    \end{enumerate}
+    Bisognerebbe avere una cosa del tipo:
+    \begin{center}
+        P $\to P_i \to P_i \to$ P $\to P_i \to P_i \to$ P $\to P_i \to P_i \to$ \dots
+    \end{center}
+    Si supponga pure che P, $P_1$ e $P_2$ operino secondo uno schema di esecuzione perpetua \verb+while(true){...}+.\\
+    \textbf{Soluzione:}
+
+
+    In questo caso si posso usare dei semaforti, quindi si possono usare le primitive \verb+V(s)+ per incrementare il semaforo e \verb+P(s)+ tentare di decrementare di 1 il valore del semaforo.\\
+    Possibile implementazione di P, $P_1$ e $P_2$:\\
+    \begin{lstlisting}
+        Semaforo turno=2;
+        Semaforo $R_1$=false;
+        Semaforo $R_2$=false;
+    \end{lstlisting}
+    \begin{minipage}[c]{0.3\textwidth}
+        \begin{lstlisting}
+            P(){
+                while(true){
+                    P(Turno)
+                    P(Turno)
+                    A
+                    V($R_1$)
+                    V($R_2$)
+                }
+            }
+        \end{lstlisting}
+    \end{minipage}
+    \begin{minipage}[c]{0.3\textwidth}
+        \begin{lstlisting}
+            $P_1$(){
+                while(true){
+                    P($R_1$)
+                    A
+                    V($P_1$)
+                }
+            }
+        \end{lstlisting}
+    \end{minipage}
+    \begin{minipage}[c]{0.3\textwidth}
+        \begin{lstlisting}
+            $P_2$(){
+                while(true){
+                    P($R_2$)
+                    A
+                    V($P_2$)
+                }
+            }
+        \end{lstlisting}
+    \end{minipage}
+\end{document}
