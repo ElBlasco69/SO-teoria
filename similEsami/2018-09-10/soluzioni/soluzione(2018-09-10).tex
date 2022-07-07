@@ -1,0 +1,335 @@
+\documentclass{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{mathtools}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
+\title{Esame 2019/07/15}
+\author{Blascovich Alessio}
+\date{}
+
+\begin{document}
+    \maketitle
+    \section*{Domanda 1}
+    \textbf{MAX PUNTI:} 4\\
+    \textbf{Domanda:}
+
+
+    Spiega in dettaglio come funziona il meccanismo della Tabella delle Pagine Invertita.\\
+    \textbf{Soluzione:}
+
+
+    Si basa su una tabella unica per tutto il sistema, quindi non per i singoli processi.\\
+    Questa tabella contiene una tupla con <pid,numero-pagina> con:
+    \begin{itemize}
+        \item PID: è l'identificativo del processo che detiene la pagina.
+        \item numero-pagina: l'indirizzo logico della pagina
+    \end{itemize}
+    Per cercare un indirizzo bisogna quindi scorrere tutta la tabella per trovare la tupla che contiene la combinazione pid e numero-pagina cercata.
+    Gli indirizzi vengono tradotti cercando la tupla nella tabella e tenendo conto in una variabile \verb+i+ di che posizione occupa nella tabella la nostra tupla (simile a dire "a che indice \verb+i+ sta la nostra tupla").\\
+    Viene poi fatto un append tra \verb+i+ e l'offset \verb+d+, l'indirizzo ottenuto è l'indirizzo fisico cercato.
+    \section*{Domanda 2}
+    \textbf{MAX PUNTI:} 4\\
+    \textbf{Domanda:}
+
+
+    Descrivere le differenze tra semafori normali e spinlock, fornire poi un esempio di utilizzo di semafori spin-lock da parte del kernel.\\
+    \textbf{Soluzione:}
+
+
+    I semafori implementati con spinlock(busy waiting) delegano la CPU ad un continuo controllo dello stato della sezione critica.\\
+    Questo li porta ad essere molto CPU-intensive e adatti a contesti dove c'è bisogno di una risposta immediata, come nel caso di accessi alla memoria.\\
+    Sono moto facili da implementare ed anche molto scalabili.\\
+    I semafori sono usate dal kernerl per sincronizzare tra di loro processi/thread.
+    \section*{Domanda 3}
+    \textbf{MAX PUNTI:} 5\\
+    \textbf{Domanda:}
+
+
+    Data la stringa di riferimenti alla memoria 1, 2, 3, 4, 1, 2, 5, 1, 2,3, 4, 5, si determinino il numero di page fault che si avranno usando gli algoritmi FIFO, LRU e ideale.\\
+    Si supponga di avere inizialmente 3 frame vuoti.\\
+    \textbf{Soluzione:}
+
+
+    Si consideri la sigla pf come l'acronimo di page-fault.
+    \begin{itemize}
+        \item \emph{FIFO}:\\
+            Il metodo \emph{FIFO} gestisce la memeoria come una semplice coda, il primo segmaneto ad essere entrato è il primo ad essere fatto uscire.\\
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & null & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=1}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=2}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=3}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 2 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=4}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=6}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=6}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=6}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=6}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 4 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=8}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 4 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=9}$
+            Termino con un totale di 9 page fault.
+        \item \emph{LRU}:\\
+            L'algoritmo \emph{LRU} tiene associato ad ogni frame il clock della CPU nell'istante in cui quel frame è stato usato per l'ultima volta, verrà tolto il frame che non viene usato da più tempo.\\
+            Nella prima riga sono indicati gli istanti, mentre nella seconda il numero del frame.\\
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 0 & 0\\
+                \hline
+                1 & null & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=1}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 0\\
+                \hline
+                1 & 2 & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=2}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 3\\
+                \hline
+                1 & 2 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=3}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 2 & 3\\
+                \hline
+                4 & 2 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=4}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 5 & 3\\
+                \hline
+                4 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 5 & 6\\
+                \hline
+                4 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=6}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                7 & 5 & 6\\
+                \hline
+                5 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                7 & 8 & 6\\
+                \hline
+                5 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                7 & 8 & 9\\
+                \hline
+                5 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                10 & 8 & 9\\
+                \hline
+                3 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=8}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                10 & 11 & 9\\
+                \hline
+                3 & 4 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=9}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                10 & 11 & 12\\
+                \hline
+                3 & 4 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=10}$
+            Termino con un totale di 10 page fault.
+        \item \emph{Ideale}:\\
+            Come dice il nome questo è un algoritmi perfetto, perchè dovrebbe prevedere il futuro, infatti dovrebbe sapere quali saranno le prossime richieste che un pogramma potrebbe fare.\\
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & null & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=1}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=2}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=3}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 4\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=4}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 4\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=4}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 4\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=4}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 2 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=6}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 4 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 4 & 5\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            Termino con un totale di 7 page fault
+    \end{itemize}
+    \section*{Domanda 4}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
+
+
+    Data la seguente tabella contenente un insieme di processi:
+    \begin{center}
+        \begin{tabular}{|c|c|c|}
+            \hline
+            \emph{Processo} & \emph{Burst} & \emph{Tempo di arrivo}\\
+            \hline
+            1 & 3 & 0\\
+            \hline
+            2 & 1 & 1\\
+            \hline
+            3 & 2 & 3\\
+            \hline
+            4 & 4 & 4\\
+            \hline
+            5 & 8 & 1\\
+            \hline
+        \end{tabular}
+    \end{center}
+    Disegnare lo schema di arrivo dei processi senco gli algoritmi HRRN e RR con quanti di tempo pari a 2.\\
+    Per quanto riguarda il RR si immagini che i processi vengano inseriti nella \emph{ready queue} in un tempo tale per cui il tempo di risposta è minimo.\\
+    Calcolare tempo di attesa, risposta e turnaround per ogni processo
+\end{document}
