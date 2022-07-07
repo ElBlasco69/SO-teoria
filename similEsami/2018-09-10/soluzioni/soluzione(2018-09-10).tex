@@ -22,13 +22,13 @@
 
 
     Si basa su una tabella unica per tutto il sistema, quindi non per i singoli processi.\\
-    Questa tabella contiene una tupla con <pid,numero-pagina> con:
+    Questa tabella contiene una tupla con $<$pid,numero-pagina$>$ con:
     \begin{itemize}
         \item PID: è l'identificativo del processo che detiene la pagina.
         \item numero-pagina: l'indirizzo logico della pagina
     \end{itemize}
     Per cercare un indirizzo bisogna quindi scorrere tutta la tabella per trovare la tupla che contiene la combinazione pid e numero-pagina cercata.
-    Gli indirizzi vengono tradotti cercando la tupla nella tabella e tenendo conto in una variabile \verb+i+ di che posizione occupa nella tabella la nostra tupla $($simile a dire "a che indice \verb+i+ sta la nostra tupla"$)$.\\
+    Gli indirizzi vengono tradotti cercando la tupla nella tabella e tenendo conto in una variabile \verb+i+ di che posizione occupa nella tabella la nostra tupla (simile a dire "a che indice \verb+i+ sta la nostra tupla").\\
     Viene poi fatto un append tra \verb+i+ e l'offset \verb+d+, l'indirizzo ottenuto è l'indirizzo fisico cercato.
     \section*{Domanda 2}
     \textbf{MAX PUNTI:} 4\\
