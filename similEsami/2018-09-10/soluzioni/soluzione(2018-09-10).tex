@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage[table]{xcolor}
 \usepackage[margin=1.5cm]{geometry}
 \usepackage{mathtools}
 \usepackage{listings}
@@ -331,5 +332,187 @@
     \end{center}
     Disegnare lo schema di arrivo dei processi senco gli algoritmi HRRN e RR con quanti di tempo pari a 2.\\
     Per quanto riguarda il RR si immagini che i processi vengano inseriti nella \emph{ready queue} in un tempo tale per cui il tempo di risposta è minimo.\\
-    Calcolare tempo di attesa, risposta e turnaround per ogni processo
+    Calcolare tempo di attesa, risposta e turnaround per ogni processo.\\
+    \textbf{Soluzione:}
+    \begin{itemize}
+        \item \emph{HRRN}: E' un algoritmo a priorità non-preempitive, la priorità viene calcolata come $R$=1+$\frac{T_{attesa}}{T_{burst}}$, questo valore va ricalcolato ogni qual volta un processo termina la propria esecuzione oppure quando un processo termina e nel mentre sono arrivati altri processi.\\
+        \begin{center}
+            \begin{tabular}{|c|c|c|c|c|c|c|}
+                \hline
+                \emph{Processo} & t=0 & t=3 & t=4 & t=6 & t=14 & t=18\\
+                \hline
+                1 & \cellcolor{blue!25}$1+\frac{0}{3}=1$ & & & & & \\
+                \hline
+                2 & & \cellcolor{blue!25}$1+\frac{2}{1}=3$ & & & &\\
+                \hline
+                3 & & $1+\frac{0}{2}=1$ & \cellcolor{blue!25}$1+\frac{1}{2}=\frac{3}{2}$ & & &\\
+                \hline
+                4 & & & $1+\frac{0}{4}=1$ & $1+\frac{2}{4}=\frac{3}{2}$ & \cellcolor{blue!25}$1+\frac{10}{4}=\frac{7}{2}$ & fine\\
+                \hline
+                5 & & $1+\frac{2}{8}=\frac{5}{4}$ & $1+\frac{3}{8}=\frac{11}{8}$ & \cellcolor{blue!25}$1+\frac{5}{8}=\frac{13}{8}$ & & \\
+                \hline
+            \end{tabular}
+        \end{center}
+        Ora dobbiamo calcolare i tempi, definiti come:
+        \begin{itemize}
+            \item $T_{attesa}$: Tempo in cui il processo è stato nella coda dei processi pronti prima di essere eseguito la prima volta.
+            \item $T_{risposta}$: Tempo totale in cui un processo è stato nella coda dei processi pronti.
+            \item $T_{turnaround}$: Tempo tra la sottoposizione del processo e la sua comclusione, può essere espresso anche come $T_{risposta}+burst$.
+        \end{itemize}
+        \begin{center}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                \emph{Processo} & $T_{attesa}$ & $T_{risposta}$ & $T_{turnaround}$\\
+                \hline
+                1 & 0 & 0 & 3\\
+                \hline
+                2 & 2 & 2 & 3\\
+                \hline
+                3 & 1 & 1 & 3\\
+                \hline
+                4 & 10 & 10 & 14\\
+                \hline
+                5 & 5 & 5 & 13\\
+                \hline
+            \end{tabular}
+        \end{center}
+        \item \emph{RR(Round Robin)}: Algoritmo basato su un time-out.\\
+        Viene dichiarato un quanto di tempo, durante questo quanto un processo può usare la CPU ma allo scadere del quanto il processo deve tornare nella coda dei processi.\\
+        In partica è un \emph{FCFS} preempitive, perchè la coda viene popolata in base all'ordine di arrivo.
+        \begin{center}\cellcolor{red!25}
+            \emph{Tabella della coda}\\
+            Il colore rosso indica quando un processo nel quanto di tempo, oppure prima termina la propria esecuzione
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+                \hline
+                \emph{Exec} & 1 & \cellcolor{red!25}2 & 5 & \cellcolor{red!25}1 & \cellcolor{red!25}3 & 4 & 5 & \cellcolor{red!25}4 & \cellcolor{red!25}5\\
+                \hline
+                \emph{Queue} & 2 & 5 & 1 & 3 & 4 & 5 & 4 & 5 &\\
+                            & 5 & 1 & 3 & 4 & 5 & & & &\\
+                            & & 4 & 5 & & & & & &\\
+                \hline
+            \end{tabular}\\
+            \vspace{1cm}
+            \emph{Tabella dell'esecuzione dei processi}\\
+            Il colore rosso indica quando un processo detiene la CPU.
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+                \hline
+                & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17\\
+                \hline
+                1 & \cellcolor{red!25} & \cellcolor{red!25} & & & &  \cellcolor{red!25} & & &  & & & & & & & & &\\
+                \hline
+                2 & & & \cellcolor{red!25} & & & & & & & & & & & & & & & \\
+                \hline
+                3 & & & & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & & & & & & & & \\
+                \hline
+                4 & & & & & & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & \cellcolor{red!25} & \cellcolor{red!25} & & & & \\
+                \hline
+                5 & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & \cellcolor{red!25} & \cellcolor{red!25} & \cellcolor{red!25} & \cellcolor{red!25}\\
+                \hline
+            \end{tabular}\\
+            \vspace{1cm}
+            \emph{Tabella dei tempi}\\
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                \emph{Processo} & $T_{attesa}$ & $T_{risposta}$ & $T_{turnaround}$\\
+                \hline
+                1 & 0 & 3 & 6\\
+                \hline
+                2 & 1 & 1 & 2\\
+                \hline
+                3 & 3 & 3 & 5\\
+                \hline
+                4 & 4 & 6 & 10\\
+                \hline
+                5 & 2 & 9 & 17\\
+                \hline
+            \end{tabular}
+        \end{center}
+    \end{itemize}
+    \section*{Domanda 5}
+    \textbf{MAX PUNTI:} 7\\
+    \textbf{Domanda:}
+
+
+    Si descriva i processi che portano da programma a processo, quindi si spiegino il concetto di binding e si enuncuino le differenti tipologie di linking e loading.\\
+    \textbf{Soluzione:}
+
+
+    Il binding è la traduzione che viene fatta da indirizzi simbolici usati nel programma in indirizzi fisici.\\
+    Il binding può essere fatto in tre moenti diverse:
+    \begin{itemize}
+        \item \emph{Compile time}: Bisogna conoscere in precedenza la locazione di memoria che il programma andrà ad occupare, se la locazione cambia bisogna ricompilare.
+        \item \emph{Load time}: Genero gli indirizzi in base a dove inizia il programma, quindi posso anche riposizionare il processo, se però cambia l'indirizzo di riferimento devo ricompilare.
+        \item \emph{Run time}: Il binding è posticipatro così da permettere di poter spostare il processo durante l'esecuzione, per motivi di efficienza questo binding richiede supporto hardware.
+    \end{itemize}
+    Il linking può essere fatto in due modi diversi:
+    \begin{itemize}
+        \item \emph{Statico}: Tutti i riferimenti sono definiti prima dell'esecuzione, e il processo dentro di se contine una copia di tutte le librerie usate.
+        \item \emph{Dinamico}: Il codice del processo non contine il codice delle librerie, ma contiene un puntatore(stub) alla funzione della libreria chiamata.\\
+        Un esempio sono le DLL(\emph{Dynamic Linked Library}) usate in Windows.
+    \end{itemize}
+    Il loading può avvenire in due modi diversi:
+    \begin{itemize}
+        \item \emph{Statico}: L'intero processo viene caricato in memoria.
+        \item \emph{Dinamico}: Il processo è diviso in moduli che vengono caricati all'evenienza, tecnica usata in casi molto particolari.
+    \end{itemize}
+    \section*{Domanda 6}
+    \textbf{MAX PUNTI:} 7\\
+    \textbf{Domanda:}
+
+
+    Considerando il seguente codice:
+    \begin{lstlisting}
+        Risorse condivise
+        semaphore S=1, T=1, U=0;
+        int x=0;
+
+        Processo P1{
+            down(&S);
+            if (x=0) then up(&T)
+            else up(&U);
+            x:=3;
+            write(x);
+        }
+
+        Processo P2{
+            down(&T);
+            x:=1;
+            up(&S);
+        }
+
+        Processo P3{
+            down(&U);
+            x:=10;
+            up(&S);
+        }
+    \end{lstlisting}
+    Si supponga che i processi siano eseguiti in modo concorrente sulla stessa CPU .\\
+    \begin{enumerate}
+        \item[a] Possono verificarsi race conditions su \verb+x+?
+        \item[b] Quali sono gli output del programma?
+        \item[c] Cosa succede se inserisco \verb+down(&S)+ nel processo \verb+P1+ subito prima  di \verb+write(x)+?\\
+        In modo tale che sia:
+        \begin{lstlisting}
+            ...
+            x:=3;
+            down(&S);
+            write(x);
+            ...
+        \end{lstlisting}
+    \end{enumerate}
+    \textbf{Soluzione:}
+
+
+    \begin{itemize}
+        \item[a] Si, perchè \verb+P1+ e \verb+P2+ possono accedere contemporaneamente ad \verb+x+.
+        \item[b] Per via delle race conditions il comportamento non è sempre uguale:
+            \begin{itemize}
+                \item \verb+P1+, \verb+P2+ e \verb+P3+ si avviano ma P3 si blocca e aspetta il semaforo \verb+U+ allora \verb+P2+ viene seguito tutto e risulta \verb+x=1+, ora \verb+P1.else+ setta \verb+U=1+ così \verb+P3+ può continuare , nel mentre \verb+P1+ ha assegnato \verb+x=3+, ma il valore viene sovrascritto da \verb+P3+ con \verb+x=10+ quindi viene stampato 10.
+                \item Partendo dal caso precedente se \verb+P1+ è l'ultimo a modificare \verb+x+ allora verrà stampato 3.
+                \item Può succedere che le istruzioni per la modifica dei semafori siano lente quindi viene  eseguito tutto \verb+P1+ e stampa 3.
+                \item Può succedere addirittura che \verb+P3+ non venga eseguito in tempo, così da eseguire prima \verb+P1+ poi prima del \verb+write+ viene seguito \verb+P2+ che modifica \verb+x=1+ così verrà stampato 1.
+            \end{itemize}
+        \item[c] Se il codice fosse stato quello il \verb+write+ sarebe stato eseguito dopo che \verb+P2+ e \verb+P3+ hanno eseguito un up nei rispettivi semafori.\\
+        Però rimangono le race conditions su \verb+x+ quindi gli output rimangono 1, 3 e 10.
+    \end{itemize}
 \end{document}
