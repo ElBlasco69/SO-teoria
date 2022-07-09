@@ -1,0 +1,370 @@
+\documentclass{article}
+\usepackage[table]{xcolor}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{caption}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
+\title{Esame 2018/09/10}
+\author{Blascovich Alessio}
+\date{}
+
+\begin{document}
+    \maketitle
+    \section*{Domanda 1}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
+
+
+    Spiegare nel dettaglio cos'è e come viene usata la memoria TLB.\\
+    \textbf{Soluzione:}
+
+
+    \emph{TLB}(Translation look-aside buffer) è una specia di cache per tradurre gli indirizzi di memoria in modo rapido, senza dover scorrere la tabella delle pagine.\\
+    Serve per evitare il problema del doppia accesso in memoria dato sal salvataggio in memoria della tabella delle pagine.\\
+    La/il TLB confronta contemporaneamente i numeri di tutte le pagine con quello fornito nell'indirizzo logico, se lo trova(TLB hit) lo concatena con l'offset, mentre se non lo trova(TLB miss) deve scannerizzare la tabella delle pagine.\\
+    La/il TLB essendo una forma di cache ha un rapporto dimensioni/costo molto elevato quindi al suo interno vengono memorizzate solo poche entry che verranno ripulite ad ogni context switch per evitare di mappare indirizzi errati.
+    \section*{Domanda 2}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
+
+
+    Si consideri di avere i processi $P_A$, $P_B$, $P_C$ e $P_D$ con le risorse $R_1$, $R_2$, $R_3$, $R_4$ e $R_5.$\\
+    Sono illustrate nelle matrici sottostanti le risorse allocate e quelle massime per ogni processo:\\
+    \begin{minipage}[c]{0.5\textwidth}
+        \captionof*{table}{\emph{ALLOC}}
+        \centering
+        \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            & $R_1$ & $R_2$ & $R_3$ & $R_4$ & $R_5$\\
+            \hline
+            $P_A$ & 1 & 0 & 2 & 1 & 1\\
+            \hline
+            $P_B$ & 2 & 0 & 1 & 1 & 1\\
+            \hline
+            $P_C$ & 1 & 1 & 0 & 1 & 0\\
+            \hline
+            $P_D$ & 1 & 1 & 1 & 1 & 0\\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}[c]{0.5\textwidth}
+        \captionof*{table}{\emph{MAX}}
+        \centering
+        \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            & $R_1$ & $R_2$ & $R_3$ & $R_4$ & $R_5$\\
+            \hline
+            $P_A$ & 1 & 1 & 2 & 1 & 3\\
+            \hline
+            $P_B$ & 2 & 2 & 2 & 1 & 1\\
+            \hline
+            $P_C$ & 2 & 1 & 3 & 1 & 0\\
+            \hline
+            $P_D$ & 1 & 1 & 2 & 2 & 1\\
+            \hline
+        \end{tabular}
+    \end{minipage}\\
+    Se il vettore delle risorse è A=(0,0,$x$,1,1), quale valore deve avere $x$ per rendere lo stato sicuro?(mostrare anche il procedimento che ha portato alla scelta di x)\\
+    \textbf{Soluzione:}
+
+
+    Provo ad usare l'algoritmo del banchiere \href{https://www.youtube.com/watch?app=desktop&v=LcspXXBImEo}{spiegazione}, quindi devo creare la matrice \emph{Need}, definita come \emph{Need}[i]=\emph{MAX}[i]-\emph{ALLOC}[i].
+    \begin{center}
+        \emph{Need}\\
+        \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            & $R_1$ & $R_2$ & $R_3$ & $R_4$ & $R_5$\\
+            \hline
+            $P_A$ & 0 & 1 & 0 & 0 & 2\\
+            \hline
+            $P_B$ & 0 & 2 & 1 & 0 & 0\\
+            \hline
+            $P_C$ & 1 & 0 & 3 & 0 & 0\\
+            \hline
+            $P_D$ & 0 & 0 & 1 & 1 & 1\\
+            \hline
+        \end{tabular}
+    \end{center}
+    Ora devo trovare una $x$ per cui vale $\forall i \in [A,\dots,D]$ : \emph{Need}[i][]$\le$A[], pongo work[]=A[].\\
+    \begin{itemize}
+        \item $x$=0 $\Rightarrow$ work=(0,0,0,1,1)
+            \begin{itemize}
+                \item (0,1,0,0,2)$\le$(0,0,0,1,1) $\Rightarrow$ \verb+false+.
+                \item (0,2,1,0,0)$\le$(0,0,0,1,1) $\Rightarrow$ \verb+false+.
+                \item (1,0,3,0,0)$\le$(0,0,0,1,1) $\Rightarrow$ \verb+false+.
+                \item (0,0,1,1,1)$\le$(0,0,0,1,1) $\Rightarrow$ \verb+false+.
+            \end{itemize}
+            Se da dal primo ciclo non incrmeneto nulla posso passare alla prossima $x$.
+        \item $x$=1 $\Rightarrow$ work=(0,0,1,1,1)
+            \begin{itemize}
+                \item (0,1,0,0,2)$\le$(0,0,1,1,1) $\Rightarrow$ \verb+false+.
+                \item (0,2,1,0,0)$\le$(0,0,1,1,1) $\Rightarrow$ \verb+false+.
+                \item (1,0,3,0,0)$\le$(0,0,1,1,1) $\Rightarrow$ \verb+false+.
+                \item (0,0,1,1,1)$\le$(0,0,1,1,1) \checkmark $\Rightarrow$ work[]=work[]+\emph{ALLOC}[$P_D$]=(1,1,2,2,1).
+            \end{itemize}
+            Ma anche ripetendo non sono in uno stato safe quindi passo alla prossima $x$.
+        \item $x$=2 $\Rightarrow$ work=(0,0,2,1,1)
+        \begin{itemize}
+            \item (0,1,0,0,2)$\le$(0,0,2,1,1) $\Rightarrow$ \verb+false+.
+            \item (0,2,1,0,0)$\le$(0,0,2,1,1) $\Rightarrow$ \verb+false+.
+            \item (1,0,3,0,0)$\le$(0,0,2,1,1) $\Rightarrow$ \verb+false+.
+            \item (0,0,1,1,1)$\le$(0,0,2,1,1) \checkmark $\Rightarrow$ work[]=work[]+\emph{ALLOC}[$P_D$]=(1,1,3,2,1).
+        \end{itemize}
+        Adesso ripeto il ciclo escludendo $P_D$ con work[]=(1,1,3,2,1).
+        \begin{itemize}
+            \item (0,1,0,0,2)$\le$(1,1,3,2,1) $\Rightarrow$ \verb+false+.
+            \item (0,2,1,0,0)$\le$(1,1,3,2,1) $\Rightarrow$ \verb+false+.
+            \item (1,0,3,0,0)$\le$(1,1,3,2,1) \checkmark $\Rightarrow$ work[]=work[]+\emph{ALLOC}[$P_C$]=(2,2,3,3,1).
+        \end{itemize}
+        Adesso ripeto il ciclo escludendo $P_D$ e $P_C$ con work[]=(2,2,3,3,1).
+        \begin{itemize}
+            \item (0,1,0,0,2)$\le$(2,2,3,3,1) $\Rightarrow$ \verb+false+.
+            \item (0,2,1,0,0)$\le$(2,2,3,3,1) \checkmark $\Rightarrow$ work[]=work[]+\emph{ALLOC}[$P_B$]=(4,2,4,4,2).
+        \end{itemize}
+        Adesso ripeto il ciclo escludendo $P_D$, $P_C$ e $P_B$ con work[]=(4,2,4,4,2).
+        \begin{itemize}
+            \item (0,1,0,0,2)$\le$(4,2,4,4,2) \checkmark $\Rightarrow$ work[]=work[]+\emph{ALLOC}[$P_A$]=(5,2,6,5,3)
+        \end{itemize}
+    \end{itemize}
+    Iterando l'algoritmo ho scoperto che il più piccolo vettore A è (0,0,2,1,1) quindi con $x$=2.
+    \section*{Domanda 3}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
+
+
+    Spiegare nel dettaglio come funzionano gli i-node e come contengono informazioni.\\
+    \textbf{Soluzione:}
+
+
+    Gli i-node sono usati nel mondo UNIX per rappresentare i file, in un i-node sono memorizzati i metadati di un file e fa anche da indice per il file.\\
+    Gli i-node sono gestiti dal O.S. quindi sono permanentemente memorizzati in una porzione riservata del disco(solitamente all'inizio).\\
+    Dopo i metadati nell'i-node sono memorizzati anche:
+    \begin{itemize}
+        \item 10 puntatori per l'accesso diretto al file.
+        \item 1 puntatore ad una tabella di indici di 1° livello.
+        \item 1 puntatore ad una tabella di indici di 2° livello.
+        \item 1 puntatore ad una tabella di indici di 3° livello.
+    \end{itemize}
+    \section*{Domanda 4}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
+
+
+    Data la stringa di frame di memoria: 1,3,2,4,1,4,3,5,1,3,2,4,5,6,1,3,4,6,4,1,2,6,1,3,4,2.\\
+    Determinare il numero di page fault dato dagli algoritmi \emph{FIFO}, \emph{LRU} e \emph{Ideale} ipotizzando si avere 3 frame a disposizione inizialmente vuoti.\\
+    \textbf{Soluzione:}
+
+
+    Si consideri la sigla pf come l'acronimo di page-fault.
+    \begin{itemize}
+        \item \emph{FIFO}:\\
+            Il metodo \emph{FIFO} gestisce la memeoria come una semplice coda, il primo segmaneto ad essere entrato è il primo ad essere fatto uscire.\\
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & null & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=1}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                    1 & 3 & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=2}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 3 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=3}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 3 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=4}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=6}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=7}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 2 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=8}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 2 & 4\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=9}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                5 & 2 & 4\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=9}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                6 & 2 & 4\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=10}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                6 & 1 & 4\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=11}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                6 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=12}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 1 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=13}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 6 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=14}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 6 & 3\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=14}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 6 & 1\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=15}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 6 & 1\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=15}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 6 & 1\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=15}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 6 & 1\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=15}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 6 & 1\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=16}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 4 & 1\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=17}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                3 & 6 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=18}$
+            Termino con un totale di 18 page fault.
+        \item \emph{LRU}:\\
+            L'algoritmo \emph{LRU} tiene associato ad ogni frame il clock della CPU nell'istante in cui quel frame è stato usato per l'ultima volta, verrà tolto il frame che non viene usato da più tempo.\\
+            Nella prima riga sono indicati gli istanti, mentre nella seconda il numero del frame.\\
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 0 & 0\\
+                \hline
+                1 & null & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=1}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 0\\
+                \hline
+                1 & 3 & null\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=2}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                1 & 2 & 3\\
+                \hline
+                1 & 3 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=3}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 2 & 3\\
+                \hline
+                4 & 3 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=4}$
+            \begin{tabular}{|c|c|c|}
+                \hline
+                4 & 5 & 3\\
+                \hline
+                4 & 1 & 2\\
+                \hline
+            \end{tabular}
+            $\xRightarrow{\text{pf}=5}$
+            %sbagliato da qua in poi, da rifare
+    \end{itemize}
+\end{document}
