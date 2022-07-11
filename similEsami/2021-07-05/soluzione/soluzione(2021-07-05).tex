@@ -267,15 +267,60 @@
 
 
     Scrivere in pseudocodice un algoritmo basato sull'uso di semafori che sincronizzi i processi \verb+P+, \verb+C1+ e \verb+C2+.\\
-    I processi devono scrivere su un buffer comune di dimensioni \verb+N+ , si tenga a mente che il buffer è mutualmente esclusivo, quindi solo un processo alla volta vi può accedere.\\
+   I processi sono organizzati secondo lo schema produttore/consumatore, \verb+P+ scrive sul buffer, mentre \verb+P1+ e \verb+P2+ leggono.\\
     Il processo \verb+C1+ ha sempre la precedenza sul buffer, quindi se \verb+C2+ prova ad accedervi ma se anche \verb+C1+ ci sta provando allora \verb+C1+ ha la precedenza.\\
     Infine su supponga che i processi siano in funzione perpetua \verb+while(true){...}+.\\
     \textbf{Soluzione:}
-    \begin{center}
-        \emph{Risorse condivise}\\
-        \begin{lstlisting}
+
+
+    Per questo probelma è possibile usare due semafori binari, uno per ogni processo consumatore.
+    \begin{lstlisting}
+        main(){
             int N=256;
-            
-        \end{lstlisting}
-    \end{center}
+            char[] buffer=new char[N];
+            Semaforo_int bufferPieno=N;
+            Semaforo_int bufferVuoto=0;
+            Semaforo_bin controlloBuffer=1;
+            Seamforo_bin gestionePrecedenza=1;
+            bool precedenza=false;
+            while(true){
+                P(){
+                    P(bufferPieno);
+                    P(controlloBuffer);
+                    //scrivi sul buffer
+                    V(controlloBuffer);
+                    V(bufferVuoto); 
+                }
+
+                C1(){
+                    P(gestionePrecedenza);
+                    precedenza=true;
+                    V(gestionePrecedenza);
+
+                    P(controlloBuffer);
+                    P(bufferVuoto);
+                    //lettura buffer
+                    V(bufferPieno);
+                    V(controlloBuffer);
+                    
+                    P(gestionePrecedenza);
+                    precedenza=false;
+                    V(gestionePrecedenza);
+                }
+
+                C2(){
+                    P(controlloBuffer);
+                    P(bufferVuoto);
+                    if(precedenza==true){
+                        V(controlloBuffer);
+                    }
+                    else{
+                        //lettura buffer
+                        V(controlloBuffer);
+                        V(bufferVuoto);
+                    }
+                }
+            }
+        }
+    \end{lstlisting}
 \end{document}
