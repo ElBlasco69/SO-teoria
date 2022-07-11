@@ -1,0 +1,211 @@
+\documentclass{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
+\title{Esame 2021/06/25}
+\author{Blascovich Alessio}
+\date{}
+
+\begin{document}
+   \maketitle
+   \section*{Domanda 1}
+   \textbf{MAX PUNTI:} 6\\
+   \textbf{Domanda:}
+
+
+   Dare la definizione di binding degli indirizzi e spiegare le tipologie di collegamento(linking) e caricamento(loading).\\
+   \textbf{Soluzione:}
+
+
+   Per binding degli indirizzi si definisce la traduzione degli indirizzi logici usati da un problema a indirizzi fisici usati da quel programma una volta che viene trasformato in processo, il binding può essere fatto in diverse fasi:
+   \begin{itemize}
+      \item \emph{Compile time}: richiede di conoscere precedentemente le locazioni di memeoria nelle quali verrà caricato il programma, se le locazioni di memoria variano allora bisogna ricompilare il programma.
+      \item \emph{Load time}: generazione degli indirzzi in base alla prima locazione di memoria occupata dal programma, di conseguenza gli indirizzi saranno della forma indirizzo\_inizio\_programma+offset.\\
+      Però se il programma viene sspostato devo ricompilare il programma.
+      \item \emph{Run time}: il binding è posticipato per permettere al processo di essere spostato in memoria durante la sua esecuzione, questo metodo richiede però supporto hardware aggiuntivo.
+   \end{itemize}
+   Il \emph{linking} può avvenire in due modi diversi:
+   \begin{enumerate}
+      \item \emph{Statico}: durante la compilazione viene caricata un copia intera delle librerie usate, quindi tutti i riferimenti sono risolti durante la compilazione.
+      \item \emph{Dinamico}: il codice in se contiene dei puntatori(stub) alla funzione esterna chiamata.
+      Un esempio di questo metodo sono i file .ddl(\emph{Dynamic Linked Library}) usate da Windows.
+   \end{enumerate}
+   Il \emph{loading} può essere effettuato in due modi diversi:
+   \begin{enumerate}
+      \item \emph{Statico}: l'intero programma viene caricato per intero in memoria.
+      \item \emph{Dinamico}: il processo viene diviso in sub routine così da caricarle in memoria solo quando necessario.
+   \end{enumerate}
+   \section*{Domanda 2}
+   \textbf{MAX PUNTI:} 6\\
+   \textbf{Domanda:}
+
+
+   Si consideri un sistema con 3 processi $P_1$, $P_2$ e $P_3$ con 3 tipi di risorse $A$, $B$ e $C$.\\
+   Si supponga che all'istante $T$ il sistema si trovi nella seguente condizione:
+
+
+   \begin{minipage}[c]{0.5\textwidth}
+      \emph{ALLOC}\\
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         \emph{processo} & $A$ & $B$ & $C$\\
+         \hline
+         $P_1$ & 2 & 2 & 3\\
+         \hline
+         $P_2$ & 2 & 0 & 3\\
+         \hline
+         $P_3$ & 1 & 2 & 4\\
+         \hline 
+      \end{tabular}
+   \end{minipage}
+   \begin{minipage}[c]{0.5\textwidth}
+      \emph{MAX}\\
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         \emph{processo} & $A$ & $B$ & $C$\\
+         \hline
+         $P_1$ & 3 & 6 & 8\\
+         \hline
+         $P_2$ & 4 & 3 & 3\\
+         \hline
+         $P_3$ & 3 & 4 & 4\\
+         \hline 
+      \end{tabular}
+   \end{minipage}\\
+   Si supponga che allo stesso istante $T$ siano ancora disponibli 2 di $A$, 3 di $B$ e 0 di $C$.
+   \begin{itemize}
+      \item[a] Il sisetma è in stato safe?
+      \item[b] All'istante $T$ il sistema può soddisfare la richiesta $P_1(1,0,1)$?
+      \item[c] All'istante $T$ il sistema può soddisfare la richiesta $P_1(2,0,0)$?
+   \end{itemize}
+   \textbf{Soluzione:}
+   \begin{itemize}
+      \item[a] Per verificare se il sistema è in uno stato safe uso l'algortimo del banchiere senza la parte che considera una possibile futura richiesta.
+         L'algortimo del banchiere crea da prima una tabella \emph{Nedd} definita come \emph{Nedd}[]=\emph{MAX}[]-\emph{ALLOC}[].\\
+         Devo inoltre porre il vettore \emph{work}[]=(2,3,0).
+         \begin{center}
+            \emph{Need}\\
+            \begin{tabular}{|c|c|c|c|}
+               \hline
+               \emph{processo} & $A$ & $B$ & $C$\\
+               \hline
+               $P_1$ & 1 & 4 & 5\\
+               \hline
+               $P_2$ & 2 & 3 & 0\\
+               \hline
+               $P_3$ & 2 & 2 & 0\\
+               \hline
+            \end{tabular}
+         \end{center}
+         Adesso devo verificare di essere in uno stato safe con i seguenti passaggi:
+         \begin{enumerate}
+            \item Scorro gli elementi di \emph{Need} fino a trovare una righa tale che \emph{Need}[] $\le$ \emph{Work}[].
+            \item Trovata la riga eseguo \emph{Work}[]=\emph{Work}[]+\emph{ALLOC}[$P_i$], torno al punto 1 escludendo dalle prossime valutazioni la riga nella quale mi sono  precedentemente fermato.
+            \item Se arrivo fino alla fine senza aver trovato una riga \emph{Need}[] $\le$ \emph{Work}[] allora \textbf{non} sono in uno stato safe.
+         \end{enumerate}
+         Inizio a iterare l'algoritmo.
+         \begin{itemize}
+            \item prima iterazione\\
+               (1,4,5) $\le$ (2,3,0) false $\Rightarrow$ ++i\\
+               (2,3,0) $\le$ (2,3,0) true $\Rightarrow$ \emph{Work}=\emph{Work}+\emph{ALLOC}[$P_B$]=(4,3,3).
+            \item seconda iterazione\\
+               (1,4,5) $\le$ (4,3,3) false $\Rightarrow$ ++i\\
+               (2,2,0) $\le$ (4,3,3) true $\Rightarrow$ \emph{Work}=\emph{Work}+\emph{ALLOC}[$P_C$]=(5,5,7).
+            \item terza iterazione\\
+               (1,4,5) $\le$ (5,5,7) true $\Rightarrow$ \emph{Work}=\emph{Work}+\emph{ALLOC}[$P_A$]=(7,7,10).
+         \end{itemize}
+         Ho concluso tutte le iterazioni servendo per ogni iterazione un processo, quindi sono in uno stato safe.\\
+      \item[b] Ora simulo la richiesta $P_1(1,0,1)$=\emph{Req}.\\
+         Devo verificare che $\forall i$ vale che \emph{Req}[]$\le$\emph{Need}[$i$][] e \emph{Req}[]$\le$\emph{Work}[].
+         \begin{itemize}
+            \item \emph{Req}[]$\le$\emph{Need}[1][] $\Rightarrow$ (1,0,1)$\le$(1,4,5) true.
+            \item \emph{Req}[]$\le$\emph{Need}[2][] $\Rightarrow$ (1,0,1)$\le$(2,3,0) false.
+         \end{itemize}
+         Essendo un requisito non soddisfatta mi fermo subito.
+      \item[c] Ora simulo la richiesta $P_1(2,0,0)$=\emph{Req}.\\
+         Devo verificare che $\forall i$ vale che \emph{Req}[]$\le$\emph{Need}[$i$][] e \emph{Req}[]$\le$\emph{Work}[].
+         \begin{itemize}
+            \item \emph{Req}[]$\le$\emph{Need}[1][] $\Rightarrow$ (2,0,0)$\le$(1,4,5) false.
+         \end{itemize}
+         Essendo un requisito non soddisfatta mi fermo subito.
+   \end{itemize}
+   \section*{Domanda 3}
+   \textbf{MAX PUNTI:} 6\\
+   \textbf{Domanda:}
+
+
+   Descrivere nel dettaglio il funzionamento del RAID di livello 5.\\
+   \textbf{Soluzione:}
+
+
+   Il RAID di 5° livello gestisce i dischi a livello di blocchi, i dati di ogni disco sono distribuiti tra tutti i dischi, e così via.\\
+   Ogni disco al suo interno ha il blocco che contiene le parità di un altro disco del RAID.\\
+   Infatti al disco $A$ è proibito avere al suo interno il blocco con le proprie parità.\\
+   E' simile al RAID di 4° livello solo che risolve il problema del singolo disco che contiene tutti i bit di parità, però la scrittura sui singoli dischi rimane comunque molto lenta come nel RAID di 4° livello.
+   \section*{Domanda 4}
+   \textbf{MAX PUNTI:} 6\\
+   \textbf{Domanda:}
+
+
+   Descrivere le principali differenze tra un processo ed un thread, facendo l'esempio di un caso pratico in cui conviene usare un thread anzichè un processo.\\
+   \textbf{Soluzione:}
+   Un processo è associato con uno spazio di indirizzi e a delle risorse del sistema, per questo quando io creo un processo figlio implicitamente creo una copia di tutte le variabili del processo padre e alloco delle nuove risorse al figlio.\\
+   Un thread è associato ai valori dei registri, al program counter(PC) al suo stato di esecuzione e allo stato dello stack.\\
+   Infatti un thread condivide lo spazio degli indirizzi con il processo da cui è stato generato e anche le risorse allocate al processo padre.\\
+   Un thread ha molti vantaggi:
+   \begin{itemize}
+      \item Riducono il tempo di risposta perchè il thread non è bloccante.
+      \item Ha una comunicazione aggevolata col padre perchè condivide con esso lo spazio degli indirizzi.
+      \item La Creazione/distruzione/switch di thread è molto più veloce che tra singoli processi.
+      \item I thread sono molto scalabili, infatti aumentano il livello di parallelismo dei processi se la macchina è multiprocessore.
+   \end{itemize}
+   A livello pratico multissimi programmi usano i thread per esempio grazie ai thread io posso navigare su internet mentre ascolto il contenuto di un file audio o scrivere un file di testo mentre ho aperto un riproduttore di video.
+   \section*{Domanda 5}
+   \textbf{MAX PUNTI:} 8\\
+   \textbf{Domanda:}
+
+
+   Dato un calcolatore con due gruppi di processi ed un buffer il quale è condiviso tra i due gruppi.\\
+   Un insieme di processi detto \verb+Reader+ è consentito accedere al buffer solo in modo mutualmente esclusivo con altri processi dello stesso gruppo e con processi del gruppo \verb+Writer+.\\
+   Scrivere uno pseudocodice che permette l'accesso al buffer dando precedenza ai processi del gruppo \verb+Reader+, quindi un \verb+Reader+ deve attendere solo e solo se un \verb+Writer+ è già in esecuzione.\\
+   Finchè arrivano \verb+Reader+ i \verb+Writer+ devono attendere.\\
+   \textbf{Soluzione:}
+   \begin{lstlisting}
+      Semaforo_bin usoBuffer=1;
+      Semaforo_bin usoPrecedenza=1;
+      bool precedenza=false;
+
+      while(true){
+         Reader(){
+            P(usoPrecedenza);
+            precedenza=true;
+            V(usoPrecedenza);
+
+            P(usoBuffer);
+            //modifica buffer
+            V(usoBuffer);
+
+            P(usoPrecedenza);
+            precedenza=false;
+            V(usoPrecedenza);
+         }
+
+         Writer(){
+            P(usoPrecedenza);
+            if(precedenza==true){
+               V(usoPrecedenza);
+            }
+            else{
+               P(usoBuffer);
+               //modifica buffer
+               V(usoBuffer)
+            }
+         }
+      }
+   \end{lstlisting}
+\end{document}
