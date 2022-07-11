@@ -1,0 +1,567 @@
+\documentclass{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{mathtools}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
+\title{Esame 2021/06/25}
+\author{Blascovich Alessio}
+\date{}
+
+\begin{document}
+   \maketitle
+   \section*{Domanda 1}
+   \textbf{MAX PUNTI:} 5\\
+   \textbf{Domanda:}
+
+
+   Spiegare nel dettaglio le differenze tra paginazione e frammentazione della memoria.\\
+   \textbf{Soluzione:}
+
+
+   Partono entrambe dallo stesso principio, ovvero quello che lo spazio dato ad un processo non deve per forza essere contiguo:
+   \begin{itemize}
+      \item \emph{Paginazione}: divide la memoria fisica in frame e quella logica in pagine, in pratica l'indirizzo logico viene visto come diviso in due parti: il numero della pagina e l'offset dall'inizio della pagina.\\
+         Ogni frame ha dimensione fissa, ma grazie alla struttura dell'indirizzo logico posso andare in cerca della pagina prima nel TLB poi nella tabella delle pagine, una volta trovato l'intervallo di memoria fisica rappresentato da quella pagina posso sommare l'offset e ottenere l'indirizzo fisico.\\
+         In generale però usando la paginazione anche se si possono dividere le aree di memoria questo non viene quasi mai fatto, infatti solitamente processi diversi hanno indrizzi logici e fisici diversi.
+      \item \emph{Segmentazione}: la memoria viene divisa come l'utente la vedrebbe.\\
+         Un programma è diviso in segmenti, ognuno dei quali contiene informazioni come: il main, funzioni, variabili e stack.\\
+         Così facendo l'indirizzo logico è formato dal numero del segmento e da un offset, che può sfruttare il TLB per velocizzare la ricerca.\\
+         La traduzione avviene in modo analogo a quella della paginazione, solo che con la segmentazione è più facile condividere codice come quello delle librerie.
+   \end{itemize}
+   \section*{Domanda 2}
+   \textbf{MAX PUNTI:} 6\\
+   \textbf{Domanda:}
+
+
+   Un calcolatore riceve una sequenza di richieste a memoria nel seguente ordine 1,4,3,3,9,7,5,2,3,2,3,2,2,5,7,6,9,2,9,2,3,1,2.\\
+   Il calcolatore preso in esame ha 4 frame per la memoria(inizialmente vuoti), calcolare il numero di page fault con gli algoritmi:
+   \begin{enumerate}
+      \item \emph{LRU}
+      \item \emph{Seconda opportunità}
+   \end{enumerate}
+   \textbf{Soluzione:}
+
+
+   Si consideri l'acronimo pf usato di seguito come l'abbreviazione di page fault.
+   \begin{enumerate}
+      \item \emph{LRU}\\
+         L'\emph{LRU} è un algoritmo basato su un contatore, ovvero ad ogni frame viene assegnato il contatorePrecedente+1.\\
+         Quando si deve togliere un frammento per fare spazio ad un altro si scarta quello con il contatore più basso, ovvero quello che non viene usato da più tempo.\\
+         Nelle seguenti tabelle la prima riga indica il contatore, mentre la seconda il numero del segmento.\\
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            1 & null & null &null\\
+            \hline
+            1 & null & null & null\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=1}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            1 & 2 & null &null\\
+            \hline
+            1 & 4 & null & null\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=2}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            1 & 2 & 3 &null\\
+            \hline
+            1 & 4 & 3 & null\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=3}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            1 & 2 & 4 & null\\
+            \hline
+            1 & 4 & 3 & null\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=3}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            1 & 2 & 4 & 5\\
+            \hline
+            1 & 4 & 3 & 9\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=4}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 2 & 4 & 5\\
+            \hline
+            7 & 4 & 3 & 9\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=5}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 7 & 4 & 5\\
+            \hline
+            7 & 5 & 3 & 9\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=6}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 7 & 8 & 5\\
+            \hline
+            7 & 5 & 2 & 9\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=7}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 7 & 8 & 9\\
+            \hline
+            7 & 5 & 2 & 3\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=8}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 7 & 10 & 9\\
+            \hline
+            7 & 5 & 2 & 3\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=8}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 7 & 10 & 11\\
+            \hline
+            7 & 5 & 2 & 3\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=8}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 7 & 12 & 11\\
+            \hline
+            7 & 5 & 2 & 3\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=8}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 7 & 13 & 11\\
+            \hline
+            7 & 5 & 2 & 3\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=8}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            6 & 14 & 13 & 11\\
+            \hline
+            7 & 5 & 2 & 3\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=8}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            15 & 14 & 13 & 11\\
+            \hline
+            7 & 5 & 2 & 3\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=8}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            15 & 14 & 13 & 16\\
+            \hline
+            7 & 5 & 2 & 6\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=9}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            15 & 14 & 17 & 16\\
+            \hline
+            7 & 5 & 9 & 6\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=10}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            15 & 18 & 17 & 16\\
+            \hline
+            7 & 4 & 9 & 6\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=11}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            15 & 18 & 17 & 19\\
+            \hline
+            7 & 4 & 9 & 2\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=12}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            15 & 18 & 20 & 19\\
+            \hline
+            7 & 4 & 9 & 2\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=12}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            15 & 18 & 20 & 21\\
+            \hline
+            7 & 4 & 9 & 2\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=12}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            22 & 18 & 20 & 21\\
+            \hline
+            3 & 4 & 9 & 2\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=13}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            22 & 23 & 20 & 21\\
+            \hline
+            3 & 1 & 9 & 2\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=14}$
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            22 & 23 & 20 & 24\\
+            \hline
+            3 & 1 & 9 & 2\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=14}$
+         Termino con un totale di 14 page fault.
+      \item \emph{Seconda opportunità}:\\
+         Questo algoritmo si basa su una struttura FIFO, ad ogni frame viene assegnato un bit il quale inizialmente è 0, mentre se la cella viene richiamata diventa 1.\\
+         Quando la memoria è satura devo prendere il frame più vecchio(FIFO) e controllare il bit, se questo è 0 rimpiazzo il frame altrimenti diminuisco il bit da 1 a 0 e vado al frame prossimo.\\
+         Nel malaugurato caso tutti i bit fossero 1 ciclo fino a farli diventare tutti 0 e poi sostituisco il frame più vecchio.\\
+         Se la spiegazione non dovessere essere stata chiara \href{https://www.youtube.com/watch?v=P1icI9X3sR4}{qui} un video dove mostrano un esercizio spiegato passo passo.\\
+         La prima riga delle tabelle indica lo stato del bit, mentre la seconda il numero del frame, per facilitare la lettura le celle saranno fatte scorrere come una coda che ha il primo elemento nella prima cella a partire da sinistra, consiglio di farlo in compito altrimenti con questo algoritmo non si tendono a fare molti errori.\\
+         \begin{tabular}{|c|c|c|c|}
+            \hline
+            0 & null & null & null\\
+            \hline
+            1 & null & null & null\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=1}$
+         \begin{tabular}{|c|c|c|c|}
+         \hline
+            0 & 0 & null & null\\
+            \hline
+            1 & 4 & null & null\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=2}$
+         \begin{tabular}{|c|c|c|c|}
+         \hline
+            0 & 0 & 0 & null\\
+            \hline
+            1 & 4 & 3 & null\\
+            \hline
+         \end{tabular}
+         $\xRightarrow{\text{pf}=3}$
+         \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 0 & 1 & null\\
+         \hline
+         1 & 4 & 3 & null\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=3}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 0 & 1 & 0\\
+         \hline
+         1 & 4 & 3 & 9\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=4}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 1 & 0 & 0\\
+         \hline
+         4 & 3 & 9 & 7\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=5}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 0 & 0\\
+         \hline
+         3 & 9 & 7 & 5\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=6}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 0 & 0 & 0\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 0 & 0\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 0 & 1\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 0 & 1\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 0 & 1\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 0 & 1\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 1 & 1\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 1 & 1 & 1\\
+         \hline
+         3 & 7 & 5 & 2\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=7}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 0 & 0 & 0\\
+         \hline
+         7 & 5 & 2 & 6\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=8}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 0 & 0 & 0\\
+         \hline
+         5 & 2 & 6 & 9\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=9}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 1 & 0 & 0\\
+         \hline
+         5 & 2 & 6 & 9\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=9}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 1 & 0 & 1\\
+         \hline
+         5 & 2 & 6 & 9\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=9}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 1 & 0 & 1\\
+         \hline
+         5 & 2 & 6 & 9\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=9}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 0 & 1 & 0\\
+         \hline
+         2 & 6 & 9 & 3\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=10}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         0 & 1 & 0 & 0\\
+         \hline
+         2 & 9 & 3 & 1\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=11}$
+      \begin{tabular}{|c|c|c|c|}
+         \hline
+         1 & 1 & 0 & 0\\
+         \hline
+         2 & 9 & 3 & 1\\
+         \hline
+      \end{tabular}
+      $\xRightarrow{\text{pf}=11}$
+      Termino con un totale di 11 page fault.
+   \end{enumerate}
+   \section*{Domanda 3}
+   \textbf{MAX PUNTI:} 6\\
+   \textbf{Domanda:}
+
+
+   Data la tabella sottostante si applichino gli algoritmi di scheduling \emph{HRRN} e \emph{RR} con quanto uguale a 2 e si calcolino $T_{risposta}$, $T_{attesa}$ e $T_{turnaround}$.
+   \begin{center}
+      \begin{tabular}{|c|c|c|}
+         \hline
+         \emph{processo} & $T_{burst}$ & $T_{arrivo}$\\
+         \hline
+         1 & 3 & 0\\
+         \hline
+         2 & 1 & 1\\
+         \hline
+         3 & 2 & 3\\
+         \hline
+         4 & 4 & 4\\
+         \hline
+         5 & 8 & 1\\
+         \hline
+      \end{tabular}
+   \end{center}
+   \textbf{Soluzione:}
+
+
+   Prima diamo un po' di definizioni:
+   \begin{itemize}
+      \item $T_{attesa}$ non è altro che il tempo che un processo rimane nella coda dei processi pronti prima di essere eseguito una prima volta.
+      \item $T_{risposta}$ il tempo totale che il processo è rimasto nella coda dei processi pronti.
+      \item $T_{turnaround}$ il tempo passato tra la terminazione del processo e la sua entrata in coda.
+   \end{itemize}
+   Adesso inizio ad applicare gli algoritmi:
+   \begin{itemize}
+      \item \emph{HRRN}:E' un algoritmo a priorità non-preemptive, la priorità viene  calcolata come $P=1+\frac{T_{attesa}}{T_{burst}}$.\\
+         Questo valore $P$ va ricalcolato ogni qualvolta un processo termina la propria esecuzione oppure arriva un nuovo processo nella coda.
+         \begin{center}
+            \begin{tabular}{|c|c|c|c|c|c|c|}
+               \hline
+               \emph{Processo} & t=0 & t=3 & t=4 & t=6 & t=14 & t=18\\
+               \hline
+               1 & \cellcolor{blue!25}$1+\frac{0}{3}=1$ & & & & & \\
+               \hline
+               2 & & \cellcolor{blue!25}$1+\frac{2}{1}=3$ & & & &\\
+               \hline
+               3 & & $1+\frac{0}{2}=1$ & \cellcolor{blue!25}$1+\frac{1}{2}=\frac{3}{2}$ & & &\\
+               \hline
+               4 & & & $1+\frac{0}{4}=1$ & $1+\frac{2}{4}=\frac{3}{2}$ & \cellcolor{blue!25}$1+\frac{10}{4}=\frac{7}{2}$ & fine\\
+               \hline
+               5 & & $1+\frac{2}{8}=\frac{5}{4}$ & $1+\frac{3}{8}=\frac{11}{8}$ & \cellcolor{blue!25}$1+\frac{5}{8}=\frac{13}{8}$ & & \\
+               \hline
+            \end{tabular}
+         \end{center}
+         Calcolo ora i vari tempi
+         \begin{center}
+            \begin{tabular}{|c|c|c|c|}
+               \hline
+               \emph{Processo} & $T_{risposta}$ & $T_{attesa}$ & $T_{turnaround}$\\
+               \hline
+               1 & 0 & 0 & 3\\
+               \hline
+               2 & 2 & 2 & 3\\
+               \hline
+               3 & 1 & 1 &3\\
+               \hline
+               4 & 10 & 10 & 14\\
+               \hline
+               5 & 5 & 5 & 13\\
+               \hline
+            \end{tabular}
+         \end{center}
+      \item \emph{RR(Round robin)}: algoritmo basato su un time-out solitamente chiamato quanto.\\
+         Il quanto è l'unità di tempo secondo la quale un processo può utilizzare la CPU, se un processi finisce prima si carica subito un altro processo, mentre se deve ancora terminare lo si accoda come in una \emph{FCFS}.\\
+         Come nella \emph{FCFS} la priorità è data in base all'arrivo.
+         \begin{center}
+            \emph{Tabella della coda di processi}\\
+            Quando una cella è rossa indica che in quel quanto il processo termina\\
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+               \hline
+               \emph{Exec} & 1 & \cellcolor{red!25} 2 & 5 & \cellcolor{red!25} 1 & \cellcolor{red!25} 3 & 4 & 5 & \cellcolor{red!25} 4 & \cellcolor{red!25} 5\\
+               \hline
+               \emph{Queue} & 2 & 5 & 1 & 3 & 4 & 5 & 4 & 5 &\\
+               & 5 & 1 & 3 & 4 & 5 & & & &\\
+               & & 4 & 5 & & & & & &\\
+               \hline
+            \end{tabular}
+         \end{center}
+         \begin{center}
+            \emph{Tabella dell'esecuzione dei processi}\\
+            Il colore rosso indica quando un processo detiene la CPU.
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+                \hline
+                & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17\\
+                \hline
+                1 & \cellcolor{red!25} & \cellcolor{red!25} & & & &  \cellcolor{red!25} & & &  & & & & & & & & &\\
+                \hline
+                2 & & & \cellcolor{red!25} & & & & & & & & & & & & & & & \\
+                \hline
+                3 & & & & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & & & & & & & & \\
+                \hline
+                4 & & & & & & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & \cellcolor{red!25} & \cellcolor{red!25} & & & & \\
+                \hline
+                5 & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & & & & \cellcolor{red!25} & \cellcolor{red!25} & & & \cellcolor{red!25} & \cellcolor{red!25} & \cellcolor{red!25} & \cellcolor{red!25}\\
+                \hline
+            \end{tabular}
+         \end{center}
+         Calcolo ora i vari tempi
+         \begin{center}
+            \begin{tabular}{|c|c|c|c|}
+               \hline
+               \emph{Processo} & $T_{risposta}$ & $T_{attesa}$ & $T_{turnaround}$\\
+               \hline
+               1 & 0 & 3 & 6\\
+               \hline
+               2 & 1 & 1 & 2\\
+               \hline
+               3 & 3 & 3 & 5\\
+               \hline
+               4 & 4 & 6 & 10\\
+               \hline
+               5 & 2 & 9 & 17\\
+               \hline
+            \end{tabular}
+         \end{center}
+   \end{itemize}
+\end{document}
