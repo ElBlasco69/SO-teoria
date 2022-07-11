@@ -1,6 +1,11 @@
 \documentclass{article}
 \usepackage[margin=1.5cm]{geometry}
 \usepackage{mathtools}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
 \title{Esame 2021/07/05}
 \author{Blascovich Alessio}
 \date{}
@@ -232,7 +237,45 @@
         \item Quanti bit devo usare per rappresentare gli indirizzi fisici?
     \end{enumerate}
     \textbf{Soluzione:}
+    \begin{enumerate}
+        \item So che una pagina è grande 8KB=8192B=$2^{13} \Rightarrow$ devo dare 13 bit per l'offset.\\
+            Ho 7 segmenti quindi 7 $\le 2^{3} \Rightarrow$ devo assegnare 3 bit per indicare il frammento.\\
+            Dopodichè devo sapere in che pagina mi trovo, sapendo che ho 1023 pagine per frame 1023 $\le 2^{10}$ quindi mi servono 10 bit per sapere in che pagina sono.\\
+            Ho quindi un totale di 13+3+10=26 bit per rappresentare un indirizzo virtuale.
+        \item 512MB=536870912B=$2^{29} \Rightarrow$ devo usare 29 bit per rappresentare la memoria fisica.
+    \end{enumerate}
+    \section*{Domanda 4}
+    \textbf{MAX PUNTI:} 6\\
+    \textbf{Domanda:}
 
 
-    
+    Definire il deadlock e spiegare quali sono le condizioni sufficienti e necessarie perchè si verifichi.\\
+    \textbf{Soluzione:}
+
+
+    Un insieme di processi viene detto in deadlock solo quando tutti i processi di quel gruppo sono in attesa di un evento che può essere generato da un processo di quel gruppo.\\
+    Perchè si verifichi un deadlock devono essere vere tutte e 4 le casistiche seguenti:
+    \begin{enumerate}
+        \item \emph{Mutua esclusione}: una o più risorse devono essere non condivisibili tra i processi.
+        \item \emph{Hold-and-wait}: un processo \verb+P1+ deve attendere che un secondo processo \verb+P2+ liberi una risorsa mentre lui ne detiene un'altra.
+        \item \emph{No preemption}: le risorse possono essere rilasciate solo volontariamente dai processi.
+        \item \emph{Attesa circolare}: deve esistere un insieme di processi che attende il liberarsi di una risorsa in modo ciclico.
+    \end{enumerate}
+    \section*{Domanda 4}
+    \textbf{MAX PUNTI:} 8\\
+    \textbf{Domanda:}
+
+
+    Scrivere in pseudocodice un algoritmo basato sull'uso di semafori che sincronizzi i processi \verb+P+, \verb+C1+ e \verb+C2+.\\
+    I processi devono scrivere su un buffer comune di dimensioni \verb+N+ , si tenga a mente che il buffer è mutualmente esclusivo, quindi solo un processo alla volta vi può accedere.\\
+    Il processo \verb+C1+ ha sempre la precedenza sul buffer, quindi se \verb+C2+ prova ad accedervi ma se anche \verb+C1+ ci sta provando allora \verb+C1+ ha la precedenza.\\
+    Infine su supponga che i processi siano in funzione perpetua \verb+while(true){...}+.\\
+    \textbf{Soluzione:}
+    \begin{center}
+        \emph{Risorse condivise}\\
+        \begin{lstlisting}
+            int N=256;
+            
+        \end{lstlisting}
+    \end{center}
 \end{document}
