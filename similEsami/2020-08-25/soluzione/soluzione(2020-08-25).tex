@@ -564,4 +564,82 @@
             \end{tabular}
          \end{center}
    \end{itemize}
+   \section*{Domanda 4}
+   \textbf{MAX PUNTI:} 6\\
+   \textbf{Domanda:}
+   \begin{itemize}
+      \item[a] Spiegare nel dettaglio come è implementata la tabella a pagine invertite.
+      \item[b] Si consideri un calcolatore che usa un sistema di paginazioen a 2 livelli le cui tabelle siano mantenute in memoria principale.\\
+         Il tempo di accesso alla memoria è circa $T=50$ns, usando una TLB con tempo di accesso pari a $T_{TLB}=2$ns, quale hit ratio($\alpha$) dovremmo avere per poter mantere il degrado delle prestazioni al di sotto del 10\text{\%} rispetto a $T$?(scrivere la formula per esteso) 
+   \end{itemize}
+   \textbf{Soluzione:}
+   \begin{enumerate}
+      \item[a] Viene creata una tabella unica per tuttto il sistema, avente un elemento per ogni frame fisico che esiste.\\
+         Ogni elemento della tabella contiene la coppia $<$PID,numero-pagina$>$.
+         \begin{itemize}
+            \item \emph{PID}: è l'id del processo che detiene la pagina.
+            \item \emph{numero-pagina}: contiene l'indirizzo logico della pagina che va a puntare al frame cercato.
+         \end{itemize}
+         Gli indirzzi generati dalla CPU devono essere quindi una tripla $<$PID,numero-apgina,offset$>$, i primi due attributi servono èper la ricerca nella tabella(sequenziale quindi O(n)), trovata la entry nella tabella si usa l'indice $i$ della entry e lo si somma all'offset.\\
+         La ricerca potrebbe diventare se si usasse una hashmap perchè la ricerca avrebbe costo O(1) ma si dovrebbe implementare un metodo per gestire le collisioni.
+      \item[b] Scrivo la formula per esteso e poi la risolvo in $\alpha$:
+         \begin{center}
+            $(T+T_{TLB})*\alpha+((3*T)+T_{TLB})*(1-\alpha) \le (T*10\%)$\\
+            $(52)*\alpha+(152)*(1-\alpha) \le 5$\\
+            $52\alpha+152-152\alpha \le 5$\\
+            $-100\alpha \le -147$\\
+            $\alpha \ge \frac{147}{100}$\\
+            $\alpha \ge 14.7\%$
+         \end{center}
+   \end{enumerate}
+   \section*{Domanda 5}
+   \textbf{MAX PUNTI:} 8\\
+   \textbf{Domanda:}
+
+
+   In una mensa universitaria, dopo aver mangiato, gli studenti ripongono i vassoi in \verb+M+ contenitori, ognuno con \verb+K+ ripiani, un cameriere è addetto allo svuotare i contenitori di vassoi per poi riportarli in sala vuoti.\\
+   Scrivere un algoritmo che regoli l'accesso alle risorse minimizzando i tempi di attesa.\\
+   \textbf{Soluzione:}\\
+   \begin{lstlisting}
+      int M,K;
+      int[][] contenitore=new int[0]*([M][K]);
+      Semafori_bin[] rack=Semafori_bin[1]*M;
+      bool[] pieno=new bool[0]*M;
+
+      Studente(){
+         while(true){
+            bool finito=false;
+            for(int i=0;i<M && !finito;++i){
+               P(rack[i]);
+               if(pieno[i]==false){
+                  for(int j=0;j<K && !finito;++j){
+                     if(contenitori[i][j]!=0){
+                        //metti vassoio
+                        finito=true;
+                        if(j==k-1){
+                           pieno[i]=true;
+                        }
+                     }
+                  }
+               }
+               V(rack[i]);
+            }
+         }
+      }
+
+      Cameriere(){
+         for(int i=0;i<M;++i){
+            P(rack[i]);
+            if(pieno[i]==true){
+               //svuota rack
+               pieno[i]=false;
+               contenitore[i]=[0]*K;
+            }
+            V(rack[i]);
+            if(i==M-1){
+               i=-1;
+            }
+         }
+      }
+   \end{lstlisting}
 \end{document}
